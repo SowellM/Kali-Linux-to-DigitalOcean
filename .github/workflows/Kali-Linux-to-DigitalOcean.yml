@@ -29,21 +29,19 @@ jobs:
       - name: Compress Image to gzip
         run: gzip -c disk.raw > disk.raw.gz
 
-      - name: Read current release version
+      - name: Versioning
         id: get_version
         run: |
           if [ ! -f version.txt ]; then
-            echo "v1.0.0" > version.txt  # Initialize version.txt if it doesn't exist
+            NEW_VERSION="v1.0.0"  # Set NEW_VERSION for the first run
+            echo "$NEW_VERSION" > version.txt
+          else
+            VERSION=$(cat version.txt)
+            MAJOR_VERSION=$(echo $VERSION | cut -d. -f1 | cut -c2-)
+            NEXT_MAJOR_VERSION=$((MAJOR_VERSION + 1))
+            NEW_VERSION="v$NEXT_MAJOR_VERSION.0.0"
+            echo "$NEW_VERSION" > version.txt
           fi
-          VERSION=$(cat version.txt)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Increment release version
-        run: |
-          MAJOR_VERSION=$(echo $VERSION | cut -d. -f1 | cut -c2-)
-          NEXT_MAJOR_VERSION=$((MAJOR_VERSION + 1))
-          NEW_VERSION="v$NEXT_MAJOR_VERSION.0.0"
-          echo $NEW_VERSION > version.txt
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Commit new version
